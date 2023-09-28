@@ -1,117 +1,61 @@
-import dash
-from dash import dcc
-from dash import html
-from dash.dependencies import Input, Output
-
-import plotly.graph_objects as go
+from dash import Dash, dcc, html, Input, Output, dash_table
+import plotly.express as px
 import pandas as pd
+import plotly.graph_objects as go
 
 
-# Read dataframe from pickle file
-df = pd.read_pickle("dataframe.pkl")
+results = pd.read_csv("results.csv").iloc[:, -4:]
+
+fig = px.parallel_coordinates(results)
 
 
-app = dash.Dash(__name__)
+app = Dash()
+
 
 app.layout = html.Div(
     [
-        dcc.ParallelCoordinates(
-            id="parallel_coordinates",
-            dimensions=[{"label": i, "values": df[i]} for i in df.columns],
+        dcc.Graph(id="parallel_coordinates", figure=fig),
+        dash_table.DataTable(
+            id="datatable",
+            columns=[
+                {"name": i, "id": i, "deletable": True, "selectable": True}
+                for i in results.columns
+            ],
+            data=results.to_dict("records"),
+            editable=True,
+            filter_action="native",
+            sort_action="native",
+            sort_mode="multi",
+            column_selectable="single",
+            row_selectable="multi",
+            row_deletable=True,
+            selected_columns=[],
+            selected_rows=[],
+            page_action="native",
+            page_current=0,
+            page_size=10,
         ),
-        dcc.Graph(id="line_chart_1"),
-        dcc.Graph(id="line_chart_2"),
-        dcc.Graph(id="line_chart_3"),
     ]
 )
+
+
+# Handle row selections:
 
 
 @app.callback(
-    [
-        Output("line_chart_1", "figure"),
-        Output("line_chart_2", "figure"),
-        Output("line_chart_3", "figure"),
-    ],
-    [Input("parallel_coordinates", "restyleData")],
+    Output("parallel_coordinates", "figure"), [Input("datatable", "selected_rows")]
 )
-def update_line_chart(restyleData):
-    # Here assume that your df has columns like 'variable1', 'variable2','variable3'
-    # Put conditions here based on restyleData to filter your dataframe
-    # Here I just return the whole dataframe
-    df_filtered = df
+def update_graph(selected_rows):
+    if sum(results.index.isin(selected_rows).astype(int)) == 0:
+        res = results
 
-    return [
-        {
-            "data": [
-                go.Scatter(
-                    x=df_filtered.index,
-                    y=df_filtered["variable1"],
-                    mode="lines+markers",
-                )
-            ]
-        },
-        {
-            "data": [
-                go.Scatter(
-                    x=df_filtered.index,
-                    y=df_filtered["variable2"],
-                    mode="lines+markers",
-                )
-            ]
-        },
-        {
-            "data": [
-                go.Scatter(
-                    x=df_filtered.index,
-                    y=df_filtered["variable3"],
-                    mode="lines+markers",
-                )
-            ]
-        },
-    ]
+    else:
+        res = results[results.index.isin(selected_rows)]
 
+    fig = px.parallel_coordinates(res)
 
-@app.callback(
-    [
-        Output("line_chart_1", "figure"),
-        Output("line_chart_2", "figure"),
-        Output("line_chart_3", "figure"),
-    ],
-    [Input("parallel_coordinates", "clickData")],
-)
-def update_line_chart(clickData):
-    df_filtered = df
-
-    return [
-        {
-            "data": [
-                go.Scatter(
-                    x=df_filtered.index,
-                    y=df_filtered["variable1"],
-                    mode="lines+markers",
-                )
-            ]
-        },
-        {
-            "data": [
-                go.Scatter(
-                    x=df_filtered.index,
-                    y=df_filtered["variable2"],
-                    mode="lines+markers",
-                )
-            ]
-        },
-        {
-            "data": [
-                go.Scatter(
-                    x=df_filtered.index,
-                    y=df_filtered["variable3"],
-                    mode="lines+markers",
-                )
-            ]
-        },
-    ]
+    return fig
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(debug=True, use_reloader=False)
