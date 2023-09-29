@@ -14,11 +14,11 @@ import plotly.graph_objects as go
 
  
 
-results = pd.read_csv('results.csv').iloc[:, -4:]
-
+results = pd.read_csv('data_generation/results.csv').iloc[:, -4:]
+release_decisions = pd.read_csv('data_generation/release_decisions.csv').iloc[:,1:]
 fig = px.parallel_coordinates(results)
 
- 
+fig_decisions = px.line(release_decisions)
 
 app = Dash()
 
@@ -69,6 +69,13 @@ app.layout = html.Div([
         page_size=10,
 
     ),
+        dcc.Graph(
+
+        id='time_series_decisions',
+
+        figure=fig_decisions
+
+    ),
 
 ])
 
@@ -85,7 +92,6 @@ app.layout = html.Div([
 )
 
 
-
 def update_graph(selected_rows):
     if sum(results.index.isin(selected_rows).astype(int)) == 0:
         res = results 
@@ -95,6 +101,20 @@ def update_graph(selected_rows):
         res
     )
     return fig
+
+@app.callback(
+    Output('time_series_decisions', 'figure'),
+    [Input('datatable', 'selected_rows')]
+)
+
+
+def update_graph_release(selected_rows):
+    if sum(results.index.isin(selected_rows).astype(int)) == 0:
+        res = release_decisions 
+    else:
+        res = release_decisions.iloc[:, selected_rows]
+    fig_decisions = px.line(res)
+    return fig_decisions
 
 
 
