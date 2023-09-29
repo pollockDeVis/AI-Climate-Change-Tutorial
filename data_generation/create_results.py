@@ -1,8 +1,8 @@
 from ema_workbench import (Model, RealParameter, ScalarOutcome)
 import pandas as pd
-from model import dps_lake_model
+from model.dps_lake_model import lake_model
 
-model = Model('lakeproblem', function=dps_lake_model)
+model = Model('lakeproblem', function=lake_model)
 
 #specify uncertainties
 model.uncertainties = [RealParameter('b', 0.1, 0.45),
