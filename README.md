@@ -28,19 +28,5 @@ The Climate Change Problem is characterized by both stochastic uncertainty and *
 |$q$	    |2 – 4.5	    |2            | Represents a decay rate in the concentration of CO2 in the atmosphere due to oceanic absorption |
 |$\delta$	|0.93 – 0.99	|0.98         | Discount rate for the economic welfare calculation, indicating the decrease in future benefits compared to present benefits |
 
-we apply a more sophisticated strategy to the problem of climate change. We employ a **closed-loop** version of the model, which means that anthropogenic emissions, represented as $a_t$, is dependent on $X_t$ (the CO2 concentration in the atmosphere at time t). For instance, we can lowerCO2 emissions when approaching the critical threshold. Using "cubic radial basis functions", following Quinn et al. 2017 we formulate $a_t$ as follows: (Please note that the formulation of $a_t$ will depend on the policy and decision mechanisms introduced, which could include a range of tools from emission tax, cap-and-trade schemes to regulations).
+ We employ a **closed-loop** version of the model, which means that anthropogenic emissions, represented as $a_t$, is dependent on $X_t$ (the CO2 concentration in the atmosphere at time t). For instance, we can lower CO2 emissions when approaching the critical threshold. We achieve adaptive policy using "cubic radial basis functions", following the [EMODPS framework](https://doi.org/10.1061/(ASCE)WR.1943-5452.0000570)
 
-
-\begin{equation}
-    a_{t} =  min\Bigg(max\bigg(\sum\limits_{j=1}^{n} w_{j}\left\vert{\frac{X_{t,i}-c_{j}}{r_{j}}}\right\vert^3, 0.01\bigg), 0.1\Bigg) \\
-    s.t. \\
-    -2 \leq c_{j} \leq 2 \\
-    0 \leq r_{j} \leq 2 \\ 
-    0 \leq w_{j} \leq 1 \\
-    \sum\limits_{j=1}^{n} w_{j} = 1
-\end{equation}
-
-
-The parameters that define this function also define the emissions strategy over time. Hence, the decision **levers** are the five parameters of this functions, namely $c_1$, $c_2$, $r_1$, $r_2$ and $w_1$. ($w_2$ = 1 - $w_1$).
-
-Note:: i is index for the realization, given m realizations; j is the index for the radial basis function, given 2 radial basis functions. 
